@@ -2,17 +2,42 @@
 
 An Android game app built with **Kotlin** and **Jetpack Compose**. Players create a profile, log in and compete on a local leaderboard. In the game, a dog catches falling treats and avoids bees.
 
-> **Status:** work in progress. The account system, profile management and leaderboard are done; the gameplay loop is being finished (see [Roadmap](#roadmap)).
+## Gameplay
+
+Drag your finger left or right to move the dog.
+
+| Object | Effect |
+|--------|--------|
+| Biscuit | +5 points |
+| Gift bone | +25 points. Missing one counts as a miss |
+| Bee | −20 points (score never drops below zero) |
+
+The game ends after **5 missed gift bones**. Objects fall more often as the score grows past 200, 500 and 1000 points. The best score is saved to the player's profile and shown on the leaderboard.
 
 ## Features
 
 - **Registration and login** with validation (unique username, password of at least 8 characters with a lowercase letter, an uppercase letter and a digit)
-- **Main menu** with a Dashboard and a Profile screen
 - **Leaderboard** that ranks users by best score and shows their avatars
 - **Profile management:** change username, change password, delete profile, log out
 - **Random avatars** fetched from the [RoboHash](https://robohash.org) API (Robot, Monster, Robot Head, Kitten)
 - **Local persistence** of users, scores and avatars with Room (SQLite)
-- **Custom game engine** based on `SurfaceView`: touch-controlled dog, falling objects, difficulty that scales with score
+- **Custom game engine** on `SurfaceView` with a fixed-step game loop
+
+## Architecture
+
+The game is split into layers so the rules can be tested without a device:
+
+| Layer | Responsibility |
+|-------|----------------|
+| `model` | Plain Kotlin game objects: `Dog`, `FallingObject`, `Hitbox` |
+| `GameEngine` | Game state and rules: spawning, falling, collisions, scoring, difficulty |
+| `GameConfig` / `GameLayout` | Tunable values and screen-relative sizes |
+| `GameAssets` | Loads and scales sprites once |
+| `GameRenderer` | Draws the scene and the HUD on a `Canvas` |
+| `GameLoop` | Background thread that updates and renders at a fixed frame time |
+| `GameView` | Surface lifecycle and touch input; reports game over through a callback |
+
+The rest of the app uses Jetpack Compose screens backed by a Room database.
 
 ## Tech stack
 
@@ -20,9 +45,10 @@ An Android game app built with **Kotlin** and **Jetpack Compose**. Players creat
 |------|------------|
 | Language | Kotlin |
 | UI | Jetpack Compose, Material 3 |
-| Game rendering | `SurfaceView` + `Canvas` with a game thread |
+| Game rendering | `SurfaceView` + `Canvas` |
 | Database | Room (with KSP) |
 | Networking | OkHttp, Kotlin Coroutines |
+| Testing | JUnit 4 |
 | Build | Gradle (Kotlin DSL), version catalog |
 
 Min SDK 24, target SDK 35.
@@ -33,9 +59,9 @@ Min SDK 24, target SDK 35.
 app/src/main/java/com/example/doggame/
 ├── datamanager/   Room database, DAO, entity, validation, logged-in user state
 ├── service/       Avatar API client
-├── model/         Game objects (Dog, Biscuit, GiftBone, Bee)
-├── game/          GameView (game loop, rendering, input)
-└── *Activity.kt   Compose screens (login, register, menu, profile, dashboard...)
+├── model/         Game objects and hitboxes
+├── game/          Engine, config, assets, renderer, loop and view
+└── *Activity.kt   Screens (login, register, menu, game, profile, dashboard...)
 ```
 
 ## Getting started
@@ -52,14 +78,19 @@ If Gradle reports an incompatible JVM, set **Settings → Build Tools → Gradle
 
 An internet connection is needed for the avatar feature.
 
+## Running tests
+
+```
+./gradlew test
+```
+
 ## Roadmap
 
-- [ ] Start the game from the main menu
-- [ ] Spawn falling objects, collision detection and scoring
-- [ ] Game over flow and best-score saving
+- [x] Start the game from the main menu
+- [x] Falling objects, collision detection and scoring
+- [x] Game over flow and best-score saving
 - [ ] Hash passwords instead of storing them in plain text
 - [ ] Move database access off the main thread
-- [ ] Align the KSP and Kotlin plugin versions
 - [ ] Add screenshots
 
 ## Origin
