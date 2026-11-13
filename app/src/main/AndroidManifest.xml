@@ -53,6 +53,7 @@
             android:name=".StartGameActivity"
             android:exported="false"
             android:label="@string/title_activity_start_game"
+            android:screenOrientation="portrait"
             android:theme="@style/Theme.DogGame" />
         <activity
             android:name=".MenuActivity"

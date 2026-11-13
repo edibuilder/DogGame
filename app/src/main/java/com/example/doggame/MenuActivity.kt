@@ -75,6 +75,14 @@ fun MenuButtons(modifier: Modifier = Modifier) {
 
         Button(
             onClick = {
+                context.startActivity(Intent(context, StartGameActivity::class.java))
+            },
+        ) {
+            Text(text = stringResource(R.string.start_game), fontSize = 20.sp)
+        }
+
+        Button(
+            onClick = {
                 context.startActivity(Intent(context, DashboardActivity::class.java))
             },
         ) {
