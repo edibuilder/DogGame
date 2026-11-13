@@ -2,10 +2,11 @@ package com.example.doggame.game
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Canvas
 import android.util.TypedValue
+import android.view.Choreographer
 import android.view.MotionEvent
-import android.view.SurfaceHolder
-import android.view.SurfaceView
+import android.view.View
 import com.example.doggame.R
 import kotlin.math.roundToInt
 
@@ -13,28 +14,62 @@ import kotlin.math.roundToInt
 class GameView(
     context: Context,
     private val onGameOver: (score: Int) -> Unit
-) : SurfaceView(context), SurfaceHolder.Callback {
+) : View(context), Choreographer.FrameCallback {
 
     private var engine: GameEngine? = null
     private var renderer: GameRenderer? = null
-    private var loop: GameLoop? = null
+
+    private var running = false
+    private var finished = false
+    private var lastFrameNanos = 0L
+    private var pendingMs = 0.0
     private var lastTouchX = 0f
 
-    init {
-        holder.addCallback(this)
+    override fun onSizeChanged(width: Int, height: Int, oldWidth: Int, oldHeight: Int) {
+        super.onSizeChanged(width, height, oldWidth, oldHeight)
+        if (engine == null && width > 0 && height > 0) setUpGame(width, height)
+        resume()
     }
 
-    override fun surfaceCreated(holder: SurfaceHolder) = Unit
-
-    override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
-        if (width <= 0 || height <= 0) return
-        if (engine == null) setUpGame(width, height)
-        startLoop(holder)
+    override fun onWindowVisibilityChanged(visibility: Int) {
+        super.onWindowVisibilityChanged(visibility)
+        if (visibility == VISIBLE) resume() else pause()
     }
 
-    override fun surfaceDestroyed(holder: SurfaceHolder) {
-        loop?.shutdown()
-        loop = null
+    override fun onDetachedFromWindow() {
+        pause()
+        super.onDetachedFromWindow()
+    }
+
+    override fun doFrame(frameTimeNanos: Long) {
+        val engine = engine
+        if (!running || engine == null) return
+
+        if (lastFrameNanos != 0L) {
+            pendingMs += (frameTimeNanos - lastFrameNanos) / NANOS_PER_MS
+            pendingMs = pendingMs.coerceAtMost(STEP_MS * MAX_STEPS_PER_FRAME)
+        }
+        lastFrameNanos = frameTimeNanos
+
+        while (pendingMs >= STEP_MS && !engine.isOver) {
+            engine.update()
+            pendingMs -= STEP_MS
+        }
+        invalidate()
+
+        if (engine.isOver) {
+            finished = true
+            pause()
+            onGameOver(engine.score)
+        } else {
+            Choreographer.getInstance().postFrameCallback(this)
+        }
+    }
+
+    override fun onDraw(canvas: Canvas) {
+        super.onDraw(canvas)
+        val engine = engine ?: return
+        renderer?.draw(canvas, engine)
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -43,9 +78,8 @@ class GameView(
         when (event.actionMasked) {
             MotionEvent.ACTION_DOWN -> lastTouchX = event.x
             MotionEvent.ACTION_MOVE -> {
-                val dx = (event.x - lastTouchX).roundToInt()
+                engine.moveDogBy((event.x - lastTouchX).roundToInt())
                 lastTouchX = event.x
-                synchronized(engine) { engine.moveDogBy(dx) }
             }
         }
         return true
@@ -64,15 +98,22 @@ class GameView(
         )
     }
 
-    private fun startLoop(holder: SurfaceHolder) {
-        val engine = engine ?: return
-        val renderer = renderer ?: return
-        if (loop?.isAlive == true || engine.isOver) return
-        loop = GameLoop(holder, engine, renderer) { score -> post { onGameOver(score) } }
-            .also { it.start() }
+    private fun resume() {
+        if (running || finished || engine == null) return
+        running = true
+        lastFrameNanos = 0L
+        Choreographer.getInstance().postFrameCallback(this)
+    }
+
+    private fun pause() {
+        running = false
+        Choreographer.getInstance().removeFrameCallback(this)
     }
 
     private companion object {
         const val HUD_TEXT_SIZE_SP = 20f
+        const val NANOS_PER_MS = 1_000_000.0
+        val STEP_MS = GameConfig.FRAME_TIME_MS.toDouble()
+        const val MAX_STEPS_PER_FRAME = 5
     }
 }

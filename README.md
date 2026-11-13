@@ -21,7 +21,7 @@ The game ends after **5 missed gift bones**. Objects fall more often as the scor
 - **Profile management:** change username, change password, delete profile, log out
 - **Random avatars** fetched from the [RoboHash](https://robohash.org) API (Robot, Monster, Robot Head, Kitten)
 - **Local persistence** of users, scores and avatars with Room (SQLite)
-- **Custom game engine** on `SurfaceView` with a fixed-step game loop
+- **Custom game engine** with a fixed-step game loop drawn on a `Canvas`
 
 ## Architecture
 
@@ -34,8 +34,7 @@ The game is split into layers so the rules can be tested without a device:
 | `GameConfig` / `GameLayout` | Tunable values and screen-relative sizes |
 | `GameAssets` | Loads and scales sprites once |
 | `GameRenderer` | Draws the scene and the HUD on a `Canvas` |
-| `GameLoop` | Background thread that updates and renders at a fixed frame time |
-| `GameView` | Surface lifecycle and touch input; reports game over through a callback |
+| `GameView` | Frame loop on `Choreographer` with fixed-step updates, touch input, pause when hidden; reports game over through a callback |
 
 The rest of the app uses Jetpack Compose screens backed by a Room database.
 
@@ -45,7 +44,7 @@ The rest of the app uses Jetpack Compose screens backed by a Room database.
 |------|------------|
 | Language | Kotlin |
 | UI | Jetpack Compose, Material 3 |
-| Game rendering | `SurfaceView` + `Canvas` |
+| Game rendering | Custom `View` + `Canvas` |
 | Database | Room (with KSP) |
 | Networking | OkHttp, Kotlin Coroutines |
 | Testing | JUnit 4 |
