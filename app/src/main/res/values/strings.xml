@@ -16,6 +16,10 @@
     <string name="dashboard">Dashboard</string>
     <string name="game_over">Game Over</string>
     <string name="play_again">Play Again</string>
+    <string name="tagline">Catch the treats, dodge the bees</string>
+    <string name="welcome_user">Welcome back, %1$s</string>
+    <string name="best_score_value">Best score: %1$d</string>
+    <string name="new_best_score">New best score!</string>
     <string name="profile">Profile</string>
     <string name="change_username">Change Username</string>
     <string name="change_password">Change Password</string>
