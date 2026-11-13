@@ -1,5 +1,6 @@
 package com.example.doggame
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -33,8 +34,13 @@ class GameOverActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        val lastScore = LoggedUser.getLastScore() ?: 0
+        val bestScore = maxOf(LoggedUser.getBestScore(), lastScore)
+        if (savedInstanceState == null) saveBestScore(this, bestScore)
+
         setContent {
-            GameOverScreen()
+            GameOverScreen(lastScore = lastScore, bestScore = bestScore)
         }
     }
 }
@@ -42,32 +48,30 @@ class GameOverActivity : ComponentActivity() {
 @Preview(showBackground = true)
 @Composable
 fun GameOverPreview() {
-    GameOverScreen()
+    GameOverScreen(lastScore = 120, bestScore = 340)
 }
 
 @Composable
-fun GameOverScreen() {
+fun GameOverScreen(lastScore: Int, bestScore: Int) {
     DogGameTheme (dynamicColor = false) {
         Surface(
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background
         ) {
-            GameOverMenuButtons(modifier = Modifier
-                .fillMaxSize()
-                .wrapContentSize(Alignment.Center))
+            GameOverMenuButtons(
+                lastScore = lastScore,
+                bestScore = bestScore,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .wrapContentSize(Alignment.Center)
+            )
         }
     }
 }
 
 @Composable
-fun GameOverMenuButtons(modifier: Modifier = Modifier) {
+fun GameOverMenuButtons(lastScore: Int, bestScore: Int, modifier: Modifier = Modifier) {
     val context = LocalContext.current
-
-    var userBestScore = LoggedUser.getBestScore()
-    val userLastScore = LoggedUser.getLastScore()
-
-    if (userBestScore < userLastScore!!) userBestScore = userLastScore
-    saveBestScore(context, userBestScore)
 
     Column(
         modifier = modifier,
@@ -82,13 +86,25 @@ fun GameOverMenuButtons(modifier: Modifier = Modifier) {
             )
         )
 
-        Text(text = stringResource(R.string.score) + ": $userLastScore")
+        Text(text = stringResource(R.string.score) + ": $lastScore")
 
-        Text(text = stringResource(R.string.best_score) + ": $userBestScore")
+        Text(text = stringResource(R.string.best_score) + ": $bestScore")
 
         Button(
             onClick = {
-                context.startActivity(Intent(context, MenuActivity::class.java))
+                context.startActivity(Intent(context, StartGameActivity::class.java))
+                (context as? Activity)?.finish()
+            }
+        ) {
+            Text(text = stringResource(R.string.play_again), fontSize = 20.sp)
+        }
+
+        Button(
+            onClick = {
+                val intent = Intent(context, MenuActivity::class.java)
+                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                context.startActivity(intent)
+                (context as? Activity)?.finish()
             }
         ) {
             Text(text = stringResource(R.string.main_menu), fontSize = 20.sp)
