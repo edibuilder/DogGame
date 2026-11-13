@@ -30,6 +30,10 @@
     <string name="get_avatar">Get Avatar</string>
     <string name="avatar_image">Avatar Image</string>
     <string name="username">Username</string>
+    <string name="password">Password</string>
+    <string name="repeat_password">Repeat password</string>
+    <string name="register_subtitle">Create an account to save your scores</string>
+    <string name="login_subtitle">Good to see you again</string>
     <string name="best_score">Best Score</string>
     <string name="score">Score</string>
     <string name="missed_gifts">Missed gifts</string>
