@@ -5,10 +5,10 @@ An Android game app built with **Kotlin** and **Jetpack Compose**. Players creat
 ## Screenshots
 
 <p align="center">
+  <img src="screenshots/start.png" alt="Start screen" width="22%">
   <img src="screenshots/main-menu.png" alt="Main menu" width="22%">
   <img src="screenshots/gameplay.png" alt="Gameplay" width="22%">
   <img src="screenshots/game-over.png" alt="Game over screen" width="22%">
-  <img src="screenshots/profile.png" alt="Profile screen" width="22%">
 </p>
 
 ## Gameplay
