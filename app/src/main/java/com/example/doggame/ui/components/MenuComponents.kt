@@ -14,9 +14,12 @@ import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,6 +30,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.doggame.R
@@ -107,6 +113,50 @@ fun MenuSubtitle(text: String, modifier: Modifier = Modifier) {
         text = text,
         style = MaterialTheme.typography.bodyLarge,
         color = BarkMuted,
+        textAlign = TextAlign.Center,
+        modifier = modifier
+    )
+}
+
+@Composable
+fun MenuTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    modifier: Modifier = Modifier,
+    isPassword: Boolean = false
+) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        label = { Text(label) },
+        singleLine = true,
+        shape = ButtonShape,
+        visualTransformation =
+            if (isPassword) PasswordVisualTransformation() else VisualTransformation.None,
+        keyboardOptions = KeyboardOptions(
+            keyboardType = if (isPassword) KeyboardType.Password else KeyboardType.Text
+        ),
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedTextColor = Bark,
+            unfocusedTextColor = Bark,
+            focusedBorderColor = Coral,
+            unfocusedBorderColor = BarkMuted.copy(alpha = 0.5f),
+            focusedLabelColor = Coral,
+            unfocusedLabelColor = BarkMuted,
+            cursorColor = Coral
+        ),
+        modifier = modifier.fillMaxWidth()
+    )
+}
+
+@Composable
+fun FormMessage(text: String, isError: Boolean, modifier: Modifier = Modifier) {
+    if (text.isEmpty()) return
+    Text(
+        text = text,
+        style = MaterialTheme.typography.bodyMedium,
+        color = if (isError) Coral else BarkMuted,
         textAlign = TextAlign.Center,
         modifier = modifier
     )
