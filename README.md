@@ -2,6 +2,15 @@
 
 An Android game app built with **Kotlin** and **Jetpack Compose**. Players create a profile, log in and compete on a local leaderboard. In the game, a dog catches falling treats and avoids bees.
 
+## Screenshots
+
+<p align="center">
+  <img src="screenshots/main-menu.png" alt="Main menu" width="22%">
+  <img src="screenshots/gameplay.png" alt="Gameplay" width="22%">
+  <img src="screenshots/game-over.png" alt="Game over screen" width="22%">
+  <img src="screenshots/profile.png" alt="Profile screen" width="22%">
+</p>
+
 ## Gameplay
 
 Drag your finger left or right to move the dog.
@@ -90,7 +99,6 @@ An internet connection is needed for the avatar feature.
 - [x] Game over flow and best-score saving
 - [ ] Hash passwords instead of storing them in plain text
 - [ ] Move database access off the main thread
-- [ ] Add screenshots
 
 ## Origin
 
